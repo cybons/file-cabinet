@@ -1,0 +1,16 @@
+.cache/**
+.idea/**
+.vscode/**
+
+.eslintcache
+
+build/**
+coverage/**
+dist/**
+**/node_modules/**
+output/**
+target/**
+
+*.js
+
+package-lock.json
