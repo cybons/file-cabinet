@@ -21,7 +21,7 @@ data_condition = {
     "正社員": ["いいえ", "いいえ"],
     "派遣": ["いいえ", "はい"],
     "契約": ["はい", "はい"],
-    "create_type_org": ["はい", "いいえ"],
+    "create_type_org": ["はい", "はい"],
 }
 condition_df = pd.DataFrame(data_condition)
 
@@ -132,8 +132,12 @@ def filter_and_label_users_by_org(org_df, condition_df, user_org):
             filtered_users["create_type_org"] = condition["create_type_org"]
             matching_df = pd.concat([matching_df, filtered_users], ignore_index=True)
 
+    matching_df["org_fullname"] = matching_df.apply(
+        lambda x: add_employee_type_to_orgname(x, org_df), axis=1
+    )
     # matching_dfに含まれるユーザーを除外してnon_matching_dfを作成
     non_matching_df = user_org[~user_org["user_code"].isin(matching_df["user_code"])]
+    non_matching_df["org_fullname"] = "条件外"
 
     return matching_df, non_matching_df
 
