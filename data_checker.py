@@ -87,7 +87,9 @@ class DataChecker:
         """
         return pd.Series(
             {
-                "emp_id_valid": self.__check_employee(row["emp_id"], row["name"]),
+                "emp_id_valid": self.__check_employee(
+                    row["emp_id"], row["name"]
+                ),  # noqa: E501
                 "org_valid": self.__check_organization(row["org_name"]),
                 "group_name_valid": self.__check_group_name(row["group_name"]),
             }
@@ -111,6 +113,28 @@ class DataChecker:
         return df
 
 
+def condition_data_checker(
+    employee_dict: dict[str, str],
+    organization_dict: dict[str, bool],
+    target_df: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    指定されたデータフレームに対してデータ検証を行い、結果を返します。
+
+    Args:
+        employee_dict (dict[str, str]): 社員番号と名前の対応辞書。
+        organization_dict (dict[str, bool]): 組織名の存在情報辞書。
+        group_dict (str): チェック対象の全角文字列。
+        target_df (pd.DataFrame): チェックを行うデータフレーム。
+
+    Returns:
+        pd.DataFrame: チェック結果が追加されたデータフレーム。
+    """
+    checker = DataChecker(employee_dict, organization_dict)
+    processed_df = checker.process_dataframe(target_df)
+    return processed_df
+
+
 # データフレームの準備
 df = pd.DataFrame(
     {
@@ -122,11 +146,6 @@ df = pd.DataFrame(
 )
 
 # 辞書データの準備
-employee_dict = {"001": "Alice", "002": "Bob"}
-organization_dict = {"Sales": True, "Engineering": True}
-
-# DataCheckerインスタンスの作成
-checker = DataChecker(employee_dict, organization_dict)
-
-processed_df = checker.process_dataframe(df)
-print(processed_df)
+employee_dict2 = {"001": "Alice", "002": "Bob"}
+organization_dict2 = {"Sales": True, "Engineering": True}
+print(condition_data_checker(employee_dict2, organization_dict2, df))
