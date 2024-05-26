@@ -417,3 +417,179 @@ df_results = calculate_and_update_organization_scores(df_A, df_B)
 print(df_results)
 
 export_to_excel(df_results, "pandas_to_excel.xlsx")
+
+
+def check_results_integrity(file_path, sheet_name="未確定"):
+    """
+    ファイルの未確定シートを読み込み、データの整合性をチェックします。
+    """
+    df = pd.read_excel(file_path, sheet_name=sheet_name)
+
+    # 確認列が含まれているかチェック
+    if "確認" not in df.columns:
+        raise ValueError("確認列が見つかりません。ファイルが正しいか確認してください。")
+
+    # 確認列が "⚪︎" または "-" のみ含んでいるかチェック
+    if not df["確認"].isin(["⚪︎", "-"]).all():
+        raise ValueError("確認列に不正な値が含まれています。")
+
+    # 確認列が "⚪︎" の前月組織が一意かチェック
+    duplicate_prev_orgs = df[df["確認"] == "⚪︎"][constants.PREV_ORG].duplicated().any()
+    if duplicate_prev_orgs:
+        raise ValueError("確認列において前月組織が重複しています。")
+
+    # 確認列が "⚪︎" の当月組織が一意かチェック
+    duplicate_curr_orgs = df[df["確認"] == "⚪︎"][constants.CURR_ORG].duplicated().any()
+    if duplicate_curr_orgs:
+        raise ValueError("確認列において当月組織が重複しています。")
+
+    return df
+
+
+def update_results_with_confirmation(df_results, checked_df):
+    """
+    チェックされたデータフレームに基づいてresultsを更新します。
+    """
+    # 確認列が "⚪︎" の行を取得
+    confirmed_rows = checked_df[checked_df["確認"] == "⚪︎"]
+
+    # 既存の確定データを一旦未確定にして同一組織もFalseにする（確認が "⚪︎" になった組織のみ）
+    for _, row in confirmed_rows.iterrows():
+        prev_org = row[constants.PREV_ORG]
+        curr_org = row[constants.CURR_ORG]
+
+        # 該当する組織ペアを未確定にして同一組織をFalseに設定
+        df_results.loc[
+            (df_results[constants.PREV_ORG] == prev_org)
+            | (df_results[constants.CURR_ORG] == curr_org),
+            [constants.SAME_ORG, constants.CONFIRMED],
+        ] = False
+
+    # confirmed_rowsの同一組織と判定された組織ペアをresultsに反映
+    for _, row in confirmed_rows.iterrows():
+        prev_org = row[constants.PREV_ORG]
+        curr_org = row[constants.CURR_ORG]
+
+        # 該当する組織ペアを確定と同一組織に設定
+        df_results.loc[
+            (df_results[constants.PREV_ORG] == prev_org)
+            & (df_results[constants.CURR_ORG] == curr_org),
+            [constants.SAME_ORG, constants.CONFIRMED],
+        ] = True
+
+    # 同名組織の確定を再度行う
+    for i, row in df_results.iterrows():
+        if row[constants.CONFIRMED]:
+            prev_org = row[constants.PREV_ORG]
+            curr_org = row[constants.CURR_ORG]
+            df_results.loc[
+                (df_results[constants.PREV_ORG] == prev_org)
+                | (df_results[constants.CURR_ORG] == curr_org),
+                constants.CONFIRMED,
+            ] = True
+
+    return df_results
+
+
+class SimulationOrg:
+    def __init__(self, org_name, group_id=None, rank=None, parent=None):
+        self.org_name = org_name
+        self.group_id = group_id
+        self.rank = rank
+        self.parent = parent
+        self.children = []
+
+    def add_child(self, child_org):
+        self.children.append(child_org)
+        child_org.parent = self
+
+    def update_org_name(self, new_name):
+        self.org_name = new_name
+        for child in self.children:
+            child.update_tree_name()
+
+    def update_tree_name(self):
+        if self.parent:
+            self.org_name = f"{self.parent.get_tree_name().split('/')[-1]}/{self.org_name.split('/')[-1]}"
+            for child in self.children:
+                child.update_tree_name()
+
+    def get_tree_name(self):
+        if self.parent:
+            return f"{self.parent.get_tree_name()}/{self.org_name.split('/')[-1]}"
+        return self.org_name
+
+    def __repr__(self):
+        return f"SimulationOrg(org_name={self.org_name}, group_id={self.group_id}, rank={self.rank})"
+
+
+def simulate_updates_with_hierarchy(prev_orgs, curr_orgs, confirmed_df):
+    # ランク別辞書を作成
+    rank_dict = defaultdict(list)
+
+    # 前月組織をランク別に分類
+    for _, row in prev_orgs.iterrows():
+        org = SimulationOrg(
+            org_name=row["org"], group_id=row["group_id"], rank=row["rank"]
+        )
+        rank_dict[row["rank"]].append(org)
+
+    # 当月組織をランク別に分類
+    for _, row in curr_orgs.iterrows():
+        org = SimulationOrg(org_name=row["org"], rank=row["rank"])
+        rank_dict[row["rank"]].append(org)
+
+    # 親子関係の構築
+    for rank in sorted(rank_dict.keys()):
+        for org in rank_dict[rank]:
+            parent_name = "/".join(org.org_name.split("/")[:-1])
+            if parent_name:
+                for parent_org in rank_dict[rank - 1]:
+                    if parent_org.org_name.split("/")[-1] == parent_name:
+                        parent_org.add_child(org)
+                        break
+
+    # ツリーネームリストの初期化
+    tree_name_list = {
+        org.get_tree_name() for rank in rank_dict for org in rank_dict[rank]
+    }
+
+    # 確定データをもとに同一組織の更新シミュレーションを行う
+    updates = []
+    for _, row in confirmed_df.iterrows():
+        if row[constants.SAME_ORG]:
+            prev_org_name = row[constants.PREV_ORG]
+            curr_org_name = row[constants.CURR_ORG]
+            for org in rank_dict[row["rank_prev"]]:
+                if org.org_name == prev_org_name:
+                    if curr_org_name not in tree_name_list:
+                        org.update_org_name(curr_org_name)
+                        tree_name_list = {
+                            org.get_tree_name()
+                            for rank in rank_dict
+                            for org in rank_dict[rank]
+                        }
+                    else:
+                        # 一時的な名前に変更してから更新する
+                        temp_name = f"{curr_org_name}_temp"
+                        org.update_org_name(temp_name)
+                        tree_name_list = {
+                            org.get_tree_name()
+                            for rank in rank_dict
+                            for org in rank_dict[rank]
+                        }
+                        org.update_org_name(curr_org_name)
+                        tree_name_list = {
+                            org.get_tree_name()
+                            for rank in rank_dict
+                            for org in rank_dict[rank]
+                        }
+
+    # 更新データの作成
+    for rank in sorted(rank_dict.keys()):
+        for org in rank_dict[rank]:
+            if org.group_id:
+                tree_name = org.get_tree_name()
+                updates.append({"group_id": org.group_id, "org_name": tree_name})
+
+    return pd.DataFrame(updates)
