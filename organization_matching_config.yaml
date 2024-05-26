@@ -1,0 +1,18 @@
+weights:
+  rank_weight: 5
+  similarity_weight: 4
+  member_weight: 3
+
+thresholds:
+  - size: 5
+    similarity_threshold: 0.5
+    member_ratio_threshold: 0.5
+    comment: "Small scale organization"
+  - size: 30
+    similarity_threshold: 0.8
+    member_ratio_threshold: 0.7
+    comment: "Medium scale organization"
+  - size: 100
+    similarity_threshold: 0.7
+    member_ratio_threshold: 0.6
+    comment: "Large scale organization"
