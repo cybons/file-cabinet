@@ -2,13 +2,14 @@ import os
 from collections import defaultdict
 from itertools import product
 
-import constants
 import pandas as pd
 import yaml
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.worksheet.table import Table, TableStyleInfo
+
+import constants
 
 
 class OrganizationMatcher:
@@ -112,11 +113,18 @@ def build_org_user_set(df, additional_columns=None):
     org_users = defaultdict(lambda: {"users": set(), "info": defaultdict(list)})
     for record in df.to_dict("records"):
         org_name = record[constants.ORG]
+
+        # 「組織」という最上位組織を除外
+        if org_name == "組織":
+            continue
+
         org_hierarchy = org_name.split("/")
 
         # 上位の組織にユーザーを追加
         for i in range(len(org_hierarchy)):
             current_org = "/".join(org_hierarchy[: i + 1])
+            if current_org == "組織":
+                continue
             org_users[current_org]["users"].add(record[constants.USER])
             for col in additional_columns:
                 org_users[current_org]["info"][col].append(record[col])
@@ -412,6 +420,32 @@ def export_to_excel(df_results, filename):
 
 
 df_results = calculate_and_update_organization_scores(df_A, df_B)
+
+
+def find_disjoint_organizations(results, df_A, df_B):
+    # 結果から前月と当月の組織を抽出
+    prev_orgs_in_results = set(results[constants.PREV_ORG])
+    curr_orgs_in_results = set(results[constants.CURR_ORG])
+
+    # 前月と当月の全組織を取得
+    all_prev_orgs = set(df_A[constants.ORG])
+    all_curr_orgs = set(df_B[constants.ORG])
+
+    # 共通ユーザーがいない組織を特定
+    disjoint_prev_orgs = all_prev_orgs - prev_orgs_in_results
+    disjoint_curr_orgs = all_curr_orgs - curr_orgs_in_results
+
+    # 結果をデータフレームに変換
+    disjoint_df = pd.DataFrame(
+        {
+            "組織": list(disjoint_prev_orgs) + list(disjoint_curr_orgs),
+            "状態": ["抹消"] * len(disjoint_prev_orgs)
+            + ["新設"] * len(disjoint_curr_orgs),
+        }
+    )
+
+    return disjoint_df
+
 
 # 結果を表示
 print(df_results)
