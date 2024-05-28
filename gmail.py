@@ -9,7 +9,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 # OAuth 2.0 クライアントIDとシークレットを保存したJSONファイルのパス
-CREDENTIALS_FILE = "client_secret_832490547824-k8u9cto79cqc2q5eo80o5hdfm3b1pkta.apps.googleusercontent.com.json"
+CREDENTIALS_FILE = ""
 TOKEN_FILE = "token.pickle"
 SCOPES = [
     "https://www.googleapis.com/auth/gmail.readonly",
