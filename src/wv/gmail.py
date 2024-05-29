@@ -9,7 +9,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 # OAuth 2.0 クライアントIDとシークレットを保存したJSONファイルのパス
-CREDENTIALS_FILE = "client_secret_832490547824-k8u9cto79cqc2q5eo80o5hdfm3b1pkta.apps.googleusercontent.com.json"
+CREDENTIALS_FILE = ""
 TOKEN_FILE = "token.pickle"
 SCOPES = [
     "https://www.googleapis.com/auth/gmail.readonly",
@@ -17,7 +17,7 @@ SCOPES = [
 ]
 
 # スプレッドシートIDと書き込む範囲
-SPREADSHEET_ID = "1-F-r4djTDHdoEeAtoEYcb_43ydSbz_ki2EpgxPX_tIk"
+SPREADSHEET_ID = ""
 RANGE_NAME = "シート1!A:E"
 
 
