@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ロット管理システム - モック (修正版)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .app {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+        }
+        
+        .mode-switch {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #0066cc;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0052a3;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-small {
+            padding: 5px 15px;
+            font-size: 12px;
+        }
+        
+        .nav-tabs {
+            background: white;
+            padding: 0 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 5px;
+        }
+        
+        .nav-tab {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab:hover {
+            color: #0066cc;
+        }
+        
+        .nav-tab.active {
+            color: #0066cc;
+            border-bottom-color: #0066cc;
+            font-weight: 600;
+        }
+        
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: #f8f9fa;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .rpa-panel {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        
+        .rpa-panel h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .rpa-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            border-left: 4px solid #0c5460;
+            color: #0c5460;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #0066cc;
+        }
+        
+        .stat-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* アラートサマリー */
+        .alert-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .alert-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .alert-danger-card {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .alert-warning-card {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .alert-info-card {
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .alert-card-icon {
+            font-size: 36px;
+        }
+        
+        .alert-card-content {
+            flex: 1;
+        }
+        
+        .alert-card-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            line-height: 1;
+        }
+        
+        .alert-card-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* ドラッグ&ドロップ */
+        .drag-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .drag-column {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .drag-column h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .order-card, .lot-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: move;
+            transition: all 0.3s;
+        }
+        
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .order-card.dragging {
+            opacity: 0.5;
+            transform: rotate(3deg);
+        }
+        
+        .lot-card {
+            cursor: default;
+            border: 2px solid transparent;
+        }
+        
+        .lot-card.expiry-warning {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .lot-card.drag-over {
+            border: 2px dashed #0066cc;
+            background: #e3f2fd;
+            transform: scale(1.02);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .card-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .card-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        
+        .info-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .stock-value {
+            color: #28a745;
+        }
+        
+        .card-drag-hint {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+        }
+        
+        .card-drop-hint {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+            text-align: center;
+            color: #0066cc;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        /* トースト通知 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10001;
+            min-width: 300px;
+            animation: slideIn 0.3s ease-out;
+            transition: transform 0.3s ease-in, opacity 0.3s ease-in; /* ★修正: 消えるときのアニメーションを追加 */
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .toast-success {
+            border-left: 4px solid #28a745;
+        }
+        
+        .toast-error {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .toast-warning {
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="header">
+            <h1>ロット管理システム</h1>
+            <div class="mode-switch">
+                <button class="btn btn-primary" id="normalModeBtn">通常モード</button>
+                <button class="btn btn-secondary" id="rpaModeBtn">RPA実行モード</button>
+            </div>
+        </div>
+        
+        <div id="normalMode">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>総在庫数</h3>
+                    <div class="value" id="totalStock">700</div>
+                </div>
+                <div class="stat-card" style="border-left-color: #28a745;">
+                    <h3>総受注数</h3>
+                    <div class="value" id="totalOrders">6</div>
+                </div>
+                <div class="stat-card" style="border-left-color: #dc3545;">
+                    <h3>未引当受注</h3>
+                    <div class="value" id="unallocatedOrders">5</div>
+                </div>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="receipt">材料入荷</button>
+                <button class="nav-tab" data-tab="order">受注管理</button>
+                <button class="nav-tab" data-tab="dragAllocation">ドラッグ引当</button>
+                <button class="nav-tab" data-tab="allocation">ロット引当</button>
+                <button class="nav-tab" data-tab="inventory">在庫一覧</button>
+                <button class="nav-tab" data-tab="alert">期限アラート</button>
+            </div>
+            
+            <div class="content">
+                <div id="receiptTab" class="tab-content">
+                    <h2>材料入荷登録</h2>
+                    <form id="receiptForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>材料</label>
+                                <select id="materialSelect" required>
+                                    <option value="">選択してください</option>
+                                    <option value="1">EXT-A123 - ブレーキパッド</option>
+                                    <option value="2">EXT-B456 - オイルフィルター</option>
+                                    <option value="3">EXT-C789 - エアフィルター</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>ロット番号</label>
+                                <input type="text" id="lotNumber" placeholder="L20251029-001" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>入荷数量</label>
+                                <input type="number" id="quantity" required>
+                            </div>
+                            <div class="form-group">
+                                <label>入荷日</label>
+                                <input type="date" id="receiptDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>有効期限</label>
+                                <input type="date" id="expiryDate" required>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button type="submit" class="btn btn-primary">登録</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div id="orderTab" class="tab-content hidden">
+                    <h2>受注一覧</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ロット番号</th>
+                                    <th>得意先</th>
+                                    <th>材料名</th>
+                                    <th>受注数量</th>
+                                    <th>納期</th>
+                                    <th>有効期限</th>
+                                    <th>ステータス</th>
+                                    <th>引当数量</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderTableBody">
+                                <tr>
+                                    <td>L20251028-001</td>
+                                    <td>デンソー05</td>
+                                    <td>ブレーキパッド</td>
+                                    <td>100</td>
+                                    <td>2025-11-05</td>
+                                    <td>2026-04-28</td>
+                                    <td><span class="badge badge-warning">未引当</span></td>
+                                    <td><input type="number" id="allocQty1" min="0" max="100" placeholder="0" style="width: 80px; padding: 5px;"></td>
+                                    <td><button class="btn btn-primary btn-small" onclick="allocateOrder(1, 'L20251028-001', 'ブレーキパッド', 100)">引当</button></td>
+                                </tr>
+                                <tr>
+                                    <td>L20251015-001</td>
+                                    <td>デンソー05</td>
+                                    <td>ブレーキパッド</td>
+                                    <td>80</td>
+                                    <td>2025-11-05</td>
+                                    <td><span style="color: #dc3545; font-weight: 600;">2025-11-25</span></td>
+                                    <td><span class="badge badge-warning">未引当</span></td>
+                                    <td><input type="number" id="allocQty2" min="0" max="80" placeholder="0" style="width: 80px; padding: 5px;"></td>
+                                    <td><button class="btn btn-primary btn-small" onclick="allocateOrder(2, 'L20251015-001', 'ブレーキパッド', 80)">引当</button></td>
+                                </tr>
+                                <tr>
+                                    <td>L20251027-002</td>
+                                    <td>デンソー05</td>
+                                    <td>オイルフィルター</td>
+                                    <td>120</td>
+                                    <td>2025-11-08</td>
+                                    <td>2026-10-27</td>
+                                    <td><span class="badge badge-warning">未引当</span></td>
+                                    <td><input type="number" id="allocQty3" min="0" max="120" placeholder="0" style="width: 80px; padding: 5px;"></td>
+                                    <td><button class="btn btn-primary btn-small" onclick="allocateOrder(3, 'L20251027-002', 'オイルフィルター', 120)">引当</button></td>
+                                </tr>
+                                <tr>
+                                    <td>L20251020-003</td>
+                                    <td>デンソー05</td>
+                                    <td>オイルフィルター</td>
+                                    <td>60</td>
+                                    <td>2025-11-10</td>
+                                    <td>2026-05-20</td>
+                                    <td><span class="badge badge-warning">未引当</span></td>
+                                    <td><input type="number" id="allocQty4" min="0" max="60" placeholder="0" style="width: 80px; padding: 5px;"></td>
+                                    <td><button class="btn btn-primary btn-small" onclick="allocateOrder(4, 'L20251020-003', 'オイルフィルター', 60)">引当</button></td>
+                                </tr>
+                                <tr>
+                                    <td>L20251026-004</td>
+                                    <td>デンソー05</td>
+                                    <td>エアフィルター</td>
+                                    <td>50</td>
+                                    <td>2025-11-12</td>
+                                    <td>2026-04-26</td>
+                                    <td><span class="badge badge-warning">未引当</span></td>
+                                    <td><input type="number" id="allocQty5" min="0" max="50" placeholder="0" style="width: 80px; padding: 5px;"></td>
+                                    <td><button class="btn btn-primary btn-small" onclick="allocateOrder(5, 'L20251026-004', 'エアフィルター', 50)">引当</button></td>
+                                </tr>
+                                <tr style="opacity: 0.6;">
+                                    <td>L20251027-005</td>
+                                    <td>デンソー05</td>
+                                    <td>タイヤ</td>
+                                    <td>40</td>
+                                    <td>2025-11-03</td>
+                                    <td>2025-12-15</td>
+                                    <td><span class="badge badge-success">引当済</span></td>
