@@ -177,6 +177,149 @@
             background: #f8f9fa;
         }
         
+        /* 編集可能なセル */
+        .editable-cell {
+            cursor: text;
+            min-width: 80px;
+            padding: 8px 12px !important;
+            background: #fffef7;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s;
+        }
+        
+        .editable-cell:hover {
+            background: #fff9e6;
+            border-color: #ffc107;
+        }
+        
+        .editable-cell:focus {
+            outline: none;
+            background: white;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+        }
+        
+        /* 2段表示セル */
+        .two-tier-cell {
+            padding: 0 !important;
+        }
+        
+        .tier-top {
+            background: #f0f0f0;
+            padding: 6px 10px;
+            border-bottom: 1px solid #d0d0d0;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .tier-top strong {
+            color: #333;
+        }
+        
+        .tier-bottom {
+            background: #fffef7;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* 単位差異ハイライト */
+        .unit-difference .tier-top {
+            background: #fff3cd;
+            border-left: 3px solid #ff9800;
+        }
+        
+        .unit-difference .tier-bottom {
+            background: #fff8e1;
+        }
+        
+        .unit-difference .tier-top strong {
+            color: #e65100;
+        }
+        
+        .tier-bottom-editable {
+            min-width: 60px;
+            padding: 4px 8px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 3px;
+            cursor: text;
+            transition: all 0.2s;
+        }
+        
+        .tier-bottom-editable:hover {
+            background: #fff9e6;
+            border-color: #ffc107;
+        }
+        
+        .tier-bottom-editable:focus {
+            outline: none;
+            background: white;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+        }
+        
+        .tier-bottom-unit {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* 折りたたみ可能セクション */
+        .collapsible-section {
+            margin-top: 30px;
+        }
+        
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s;
+            user-select: none;
+        }
+        
+        .collapsible-header:hover {
+            background: #e9ecef;
+        }
+        
+        .collapsible-header h3 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .collapsible-toggle {
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .collapsible-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+        
+        .collapsible-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s;
+            opacity: 1;
+        }
+        
+        .collapsible-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        
+        .sap-register-btn {
+            margin-top: 15px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
         .badge {
             display: inline-block;
             padding: 4px 8px;
@@ -445,6 +588,7 @@
             z-index: 10001;
             min-width: 300px;
             animation: slideIn 0.3s ease-out;
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
         }
         
         @keyframes slideIn {
@@ -1033,6 +1177,64 @@
                     </div>
                 </div>
                 
+                <div class="collapsible-section">
+                    <div class="collapsible-header" onclick="toggleCollapse('shippingData')">
+                        <h3>
+                            <span>📦 出荷データ</span>
+                            <span style="font-size: 14px; color: #666; font-weight: normal;" id="shippingDataCount">(3件)</span>
+                        </h3>
+                        <span class="collapsible-toggle" id="shippingDataToggle">▼</span>
+                    </div>
+                    <div class="collapsible-content" id="shippingDataContent">
+                        <div class="table-container">
+                            <table id="shippingDataTable">
+                                <thead>
+                                    <tr>
+                                        <th>ロット番号</th>
+                                        <th>先方品番</th>
+                                        <th>メーカー品番</th>
+                                        <th style="min-width: 150px;">数量</th>
+                                        <th>仕入れ先</th>
+                                        <th>出荷倉庫コード</th>
+                                        <th>出荷倉庫名</th>
+                                        <th>次区コード</th>
+                                        <th>納入先コード</th>
+                                        <th>納入先名称</th>
+                                        <th>出荷表テキスト</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="shippingDataTableBody">
+                                    <!-- データはJavaScriptで動的に生成 -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="sap-register-btn">
+                            <button class="btn btn-success" onclick="registerToSAP()">📝 SAP登録</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <h3>📋 SAP登録ログ</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>送信日時</th>
+                                    <th>送信件数</th>
+                                    <th>ステータス</th>
+                                    <th>備考</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sapLogTableBody">
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: #999;">まだ送信履歴がありません</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
                 <div style="margin-top: 30px;">
                     <h3>実行履歴</h3>
                     <div class="table-container">
@@ -1148,8 +1350,8 @@
             `;
             
             // 統計更新
-            const currentStock = parseInt(document.getElementById('totalStock').textContent);
-            document.getElementById('totalStock').textContent = currentStock + parseInt(quantity);
+            const currentStock = parseInt(document.getElementById('totalStock').textContent, 10) || 0;
+            document.getElementById('totalStock').textContent = currentStock + parseInt(quantity, 10);
             
             showToast('入荷登録が完了しました', 'success');
             receiptForm.reset();
@@ -1162,7 +1364,7 @@
         // 引当処理
         function allocateOrder(rowId, lotNumber, materialName, orderQuantity) {
             const qtyInput = document.getElementById(`allocQty${rowId}`);
-            const allocQty = parseInt(qtyInput.value) || 0;
+            const allocQty = parseInt(qtyInput.value, 10) || 0;
             
             if (allocQty <= 0) {
                 showToast('引当数量を入力してください', 'warning');
@@ -1192,7 +1394,7 @@
                 const rowLotNumber = row.cells[0].textContent;
                 if (rowLotNumber === lotNumber) {
                     const remainingCell = row.cells[4];
-                    const currentRemaining = parseInt(remainingCell.textContent);
+                    const currentRemaining = parseInt(remainingCell.textContent, 10) || 0;
                     remainingCell.textContent = currentRemaining - allocQty;
                 }
             });
@@ -1202,19 +1404,28 @@
             const isFullyAllocated = allocQty === orderQuantity;
             
             if (isFullyAllocated) {
-                orderRow.querySelector('td:nth-child(6)').innerHTML = '<span class="badge badge-success">引当済</span>';
-                orderRow.querySelector('td:nth-child(7)').textContent = '-';
+                // 全量引当
+                orderRow.querySelector('td:nth-child(7)').innerHTML = '<span class="badge badge-success">引当済</span>';
                 orderRow.querySelector('td:nth-child(8)').textContent = '-';
+                orderRow.querySelector('td:nth-child(9)').textContent = '-';
                 
                 // 統計更新
-                const unallocated = parseInt(document.getElementById('unallocatedOrders').textContent);
+                const unallocated = parseInt(document.getElementById('unallocatedOrders').textContent, 10) || 0;
                 document.getElementById('unallocatedOrders').textContent = unallocated - 1;
             } else {
-                orderRow.querySelector('td:nth-child(6)').innerHTML = '<span class="badge badge-warning">部分引当</span>';
+                // 部分引当 - 残量を表示
+                const remainingQty = orderQuantity - allocQty;
+                orderRow.querySelector('td:nth-child(7)').innerHTML = '<span class="badge badge-warning">部分引当</span>';
+                orderRow.querySelector('td:nth-child(4)').innerHTML = 
+                    `<span style="color: #dc3545; font-weight: 600;">${remainingQty}</span> <small style="color: #999;">(残)</small>`;
+                
+                // 入力欄のmaxを更新
+                qtyInput.max = remainingQty;
+                qtyInput.placeholder = `0 / ${remainingQty}`;
             }
             
             // 総在庫数更新
-            const totalStock = parseInt(document.getElementById('totalStock').textContent);
+            const totalStock = parseInt(document.getElementById('totalStock').textContent, 10) || 0;
             document.getElementById('totalStock').textContent = totalStock - allocQty;
             
             // 入力欄をクリア
@@ -1259,6 +1470,8 @@
         });
         
         // ドラッグ&ドロップ機能
+        let draggedOrderData = null;
+        
         function initDragAndDrop() {
             const orderCards = document.querySelectorAll('.order-card');
             const lotCards = document.querySelectorAll('.lot-card');
@@ -1268,22 +1481,33 @@
                 card.addEventListener('dragstart', (e) => {
                     card.classList.add('dragging');
                     e.dataTransfer.effectAllowed = 'move';
-                    e.dataTransfer.setData('orderId', card.dataset.orderId);
-                    e.dataTransfer.setData('material', card.dataset.material);
-                    e.dataTransfer.setData('quantity', card.dataset.quantity);
+                    
+                    // ドラッグ中のデータを保持
+                    draggedOrderData = {
+                        orderId: card.dataset.orderId,
+                        material: card.dataset.material,
+                        quantity: parseInt(card.dataset.quantity, 10)
+                    };
+                    
+                    e.dataTransfer.setData('text/plain', ''); // Firefox対応
                 });
                 
                 card.addEventListener('dragend', (e) => {
                     card.classList.remove('dragging');
+                    draggedOrderData = null;
                 });
             });
             
             // ロットカードのドロップイベント
             lotCards.forEach(card => {
                 card.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    const material = [...e.dataTransfer.types].find(t => t === 'material');
-                    if (material) {
+                    if (!draggedOrderData) return;
+                    
+                    const lotMaterial = card.dataset.material;
+                    
+                    // 材料が一致する場合のみドロップ可能
+                    if (draggedOrderData.material === lotMaterial) {
+                        e.preventDefault();
                         card.classList.add('drag-over');
                         const hint = card.querySelector('.card-drop-hint');
                         if (hint) hint.classList.remove('hidden');
@@ -1302,13 +1526,15 @@
                     const hint = card.querySelector('.card-drop-hint');
                     if (hint) hint.classList.add('hidden');
                     
-                    const orderId = e.dataTransfer.getData('orderId');
-                    const orderMaterial = e.dataTransfer.getData('material');
-                    const orderQuantity = parseInt(e.dataTransfer.getData('quantity'));
+                    if (!draggedOrderData) return;
+                    
+                    const orderId = draggedOrderData.orderId;
+                    const orderMaterial = draggedOrderData.material;
+                    const orderQuantity = draggedOrderData.quantity;
                     
                     const lotNumber = card.dataset.lotNumber;
                     const lotMaterial = card.dataset.material;
-                    const lotStock = parseInt(card.dataset.stock);
+                    const lotStock = parseInt(card.dataset.stock, 10) || 0;
                     
                     // 材料が一致するかチェック
                     if (orderMaterial !== lotMaterial) {
@@ -1378,20 +1604,290 @@
                 const rowLotNumber = row.cells[0].textContent;
                 if (rowLotNumber === lotNumber) {
                     const remainingCell = row.cells[4];
-                    const currentRemaining = parseInt(remainingCell.textContent);
+                    const currentRemaining = parseInt(remainingCell.textContent, 10) || 0;
                     remainingCell.textContent = currentRemaining - quantity;
                 }
             });
             
             // 統計更新
-            const unallocated = parseInt(document.getElementById('unallocatedOrders').textContent);
+            const unallocated = parseInt(document.getElementById('unallocatedOrders').textContent, 10) || 0;
             document.getElementById('unallocatedOrders').textContent = unallocated - 1;
             
-            const totalStock = parseInt(document.getElementById('totalStock').textContent);
+            const totalStock = parseInt(document.getElementById('totalStock').textContent, 10) || 0;
             document.getElementById('totalStock').textContent = totalStock - quantity;
             
             showToast(`✅ 引当完了: ${materialName} ${quantity}個 → ${lotNumber}`, 'success');
         }
+        
+        // ========================================
+        // 出荷データ管理機能
+        // ========================================
+        
+        // 出荷データのJSON配列
+        let shippingData = [
+            {
+                lotNumber: "",
+                customerPartNumber: "ABC-12345",
+                makerPartNumber: "XYZ-98765",
+                orderQuantity: 100,          // 受注数量(固定)
+                orderQuantityUnit: "個",      // 受注数量単位(固定)
+                quantity: 100,               // 内部数量(編集可)
+                quantityUnit: "個",           // 内部数量単位(表示のみ)
+                supplier: "デンソー",
+                warehouseCode: "W001",
+                warehouseName: "名古屋倉庫",
+                nextAreaCode: "A01",
+                deliveryCode: "D001",
+                deliveryName: "トヨタ自動車",
+                shippingText: "磯部"
+            },
+            {
+                lotNumber: "LOT-2025-001",
+                customerPartNumber: "DEF-67890",
+                makerPartNumber: "MNO-54321",
+                orderQuantity: 500,          // 受注: 500個
+                orderQuantityUnit: "個",
+                quantity: 50,                // 内部: 50箱(単位換算)
+                quantityUnit: "箱",
+                supplier: "アイシン",
+                warehouseCode: "W002",
+                warehouseName: "豊田倉庫",
+                nextAreaCode: "A02",
+                deliveryCode: "D002",
+                deliveryName: "日産自動車",
+                shippingText: "LOT-2025-001/磯部"
+            },
+            {
+                lotNumber: "LOT-2025-002",
+                customerPartNumber: "GHI-11111",
+                makerPartNumber: "PQR-22222",
+                orderQuantity: 200,          // 受注: 200kg
+                orderQuantityUnit: "kg",
+                quantity: 200,               // 内部: 200kg(同じ単位)
+                quantityUnit: "kg",
+                supplier: "豊田合成",
+                warehouseCode: "W001",
+                warehouseName: "名古屋倉庫",
+                nextAreaCode: "A03",
+                deliveryCode: "D003",
+                deliveryName: "ホンダ",
+                shippingText: "LOT-2025-002/磯部"
+            }
+        ];
+        
+        // SAP登録ログ
+        let sapLogs = [];
+        
+        // 出荷データテーブルを描画
+        function renderShippingDataTable() {
+            const tbody = document.getElementById('shippingDataTableBody');
+            tbody.innerHTML = '';
+            
+            shippingData.forEach((row, index) => {
+                // 単位が異なるかチェック
+                const isDifferentUnit = row.orderQuantityUnit !== row.quantityUnit;
+                const unitDiffClass = isDifferentUnit ? 'unit-difference' : '';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="editable-cell" contenteditable="true" data-row="${index}" data-field="lotNumber">${row.lotNumber}</td>
+                    <td>${row.customerPartNumber}</td>
+                    <td>${row.makerPartNumber}</td>
+                    <td class="two-tier-cell ${unitDiffClass}">
+                        <div class="tier-top">
+                            受注: <strong>${row.orderQuantity}</strong> ${row.orderQuantityUnit}
+                        </div>
+                        <div class="tier-bottom">
+                            内部:
+                            <span class="tier-bottom-editable" contenteditable="true" data-row="${index}" data-field="quantity">${row.quantity}</span>
+                            <span class="tier-bottom-unit">${row.quantityUnit}</span>
+                        </div>
+                    </td>
+                    <td>${row.supplier}</td>
+                    <td>${row.warehouseCode}</td>
+                    <td>${row.warehouseName}</td>
+                    <td>${row.nextAreaCode}</td>
+                    <td>${row.deliveryCode}</td>
+                    <td>${row.deliveryName}</td>
+                    <td class="editable-cell" contenteditable="true" data-row="${index}" data-field="shippingText">${row.shippingText}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            // 件数を更新
+            document.getElementById('shippingDataCount').textContent = `(${shippingData.length}件)`;
+            
+            // 編集可能セルのイベントリスナーを設定
+            setupEditableCells();
+        }
+        
+        // 編集可能セルのイベントリスナー設定
+        function setupEditableCells() {
+            const editableCells = document.querySelectorAll('#shippingDataTable .editable-cell');
+            const quantityCells = document.querySelectorAll('#shippingDataTable .tier-bottom-editable');
+            
+            // ロット番号の編集
+            editableCells.forEach(cell => {
+                if (cell.dataset.field === 'lotNumber') {
+                    cell.addEventListener('blur', function() {
+                        const rowIndex = parseInt(this.dataset.row);
+                        const newLotNumber = this.textContent.trim();
+                        
+                        // データを更新
+                        shippingData[rowIndex].lotNumber = newLotNumber;
+                        
+                        // 出荷表テキストを自動生成
+                        const newShippingText = newLotNumber ? `${newLotNumber}/磯部` : '磯部';
+                        shippingData[rowIndex].shippingText = newShippingText;
+                        
+                        // 出荷表テキストセルを更新
+                        const shippingTextCell = document.querySelector(
+                            `#shippingDataTable .editable-cell[data-row="${rowIndex}"][data-field="shippingText"]`
+                        );
+                        if (shippingTextCell) {
+                            shippingTextCell.textContent = newShippingText;
+                        }
+                        
+                        showToast('ロット番号を更新しました', 'success');
+                    });
+                }
+                
+                // 出荷表テキストの直接編集
+                if (cell.dataset.field === 'shippingText') {
+                    cell.addEventListener('blur', function() {
+                        const rowIndex = parseInt(this.dataset.row);
+                        const newShippingText = this.textContent.trim();
+                        
+                        // データを更新
+                        shippingData[rowIndex].shippingText = newShippingText;
+                        
+                        showToast('出荷表テキストを更新しました', 'success');
+                    });
+                }
+                
+                // Enterキーで次のセルに移動
+                cell.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.blur();
+                    }
+                });
+            });
+            
+            // 内部数量の編集
+            quantityCells.forEach(cell => {
+                cell.addEventListener('blur', function() {
+                    const rowIndex = parseInt(this.dataset.row);
+                    const newQuantity = parseFloat(this.textContent.trim()) || 0;
+                    
+                    // データを更新
+                    shippingData[rowIndex].quantity = newQuantity;
+                    
+                    // 数値のフォーマット
+                    this.textContent = newQuantity;
+                    
+                    showToast('内部数量を更新しました', 'success');
+                });
+                
+                // 数値入力のバリデーション
+                cell.addEventListener('keypress', function(e) {
+                    // 数字、小数点、バックスペース、削除のみ許可
+                    if (!/[\d.]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.blur();
+                        } else {
+                            e.preventDefault();
+                        }
+                    }
+                });
+            });
+        }
+        
+        // 折りたたみ機能
+        function toggleCollapse(sectionId) {
+            const content = document.getElementById(sectionId + 'Content');
+            const toggle = document.getElementById(sectionId + 'Toggle');
+            
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                toggle.classList.remove('collapsed');
+            } else {
+                content.classList.add('collapsed');
+                toggle.classList.add('collapsed');
+            }
+        }
+        
+        // SAP登録機能
+        function registerToSAP() {
+            // 確認ダイアログ
+            const confirmed = confirm(`
+【SAP登録確認】
+
+以下のデータをSAPに登録します:
+・登録件数: ${shippingData.length}件
+・単位換算あり: ${shippingData.filter(d => d.orderQuantityUnit !== d.quantityUnit).length}件
+
+登録を実行しますか?`);
+            
+            if (!confirmed) {
+                return;
+            }
+            
+            // 送信処理をシミュレート
+            const now = new Date();
+            const timestamp = now.toLocaleString('ja-JP', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            // ログに追加
+            const logEntry = {
+                timestamp: timestamp,
+                count: shippingData.length,
+                status: 'success',
+                note: '正常に送信されました'
+            };
+            sapLogs.unshift(logEntry); // 最新のログを先頭に
+            
+            // ログテーブルを更新
+            renderSapLogs();
+            
+            // 成功メッセージ
+            showToast(`✅ SAP登録完了: ${shippingData.length}件のデータを送信しました`, 'success');
+        }
+        
+        // SAP登録ログを描画
+        function renderSapLogs() {
+            const tbody = document.getElementById('sapLogTableBody');
+            
+            if (sapLogs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">まだ送信履歴がありません</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            sapLogs.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${log.timestamp}</td>
+                    <td>${log.count}件</td>
+                    <td><span class="badge badge-success">完了</span></td>
+                    <td>${log.note}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        // ページロード時に出荷データテーブルを初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderShippingDataTable();
+            renderSapLogs();
+        });
     </script>
 </body>
 </html>
